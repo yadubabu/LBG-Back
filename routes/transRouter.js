@@ -32,34 +32,25 @@ transRouter.post("/", async (req, res) => {
 
     await newTrans.save();
 
+    const getTotals = await TransactionsTrack.find();
+    const totalAmount = _.sum([
+      // getTotals[0].totSavings,
+      getTotals[0].totExpense,
+      getTotals[0].totInvestment,
+      newTrans.amount,
+    ]);
+    // console.log(totalAmount);
     if (newTrans.type === "savings") {
-      const getTotals = await TransactionsTrack.find();
-      // if (
-      //   getTotals[0].totAmount >
-      //   getTotals[0].totSavings +
-      //     getTotals[0].getTotals[0].totExpense +
-      //     totInvestment
-      // ) {
       return await TransactionsTrack.findByIdAndUpdate(
         getTotals[0]._id.toString(),
         {
           totAmount: _.sum([getTotals[0].totAmount, newTrans.amount]),
-          totExpense: 0,
-          totInvestment: 0,
-          totSavings: 0,
-          // totSavings: _.sum([newTrans.amount, getTotals[0].totSavings]),
+          totSavings: _.sum([newTrans.amount, getTotals[0].totSavings]),
         }
       );
-      // }
     }
     if (newTrans.type === "expense") {
-      const getTotals = await TransactionsTrack.find();
-      if (
-        getTotals[0].totAmount >
-        getTotals[0].totSavings +
-          getTotals[0].getTotals[0].totExpense +
-          totInvestment
-      ) {
+      if (getTotals[0].totAmount > totalAmount) {
         return await TransactionsTrack.findByIdAndUpdate(
           getTotals[0]._id.toString(),
           {
@@ -67,16 +58,12 @@ transRouter.post("/", async (req, res) => {
             totExpense: _.sum([newTrans.amount, getTotals[0].totExpense]),
           }
         );
+      } else {
+        console.log("There is no suffecient balance in your account");
       }
     }
     if (newTrans.type === "investment") {
-      const getTotals = await TransactionsTrack.find();
-      if (
-        getTotals[0].totAmount >
-        getTotals[0].totSavings +
-          getTotals[0].getTotals[0].totExpense +
-          totInvestment
-      ) {
+      if (getTotals[0].totAmount > totalAmount) {
         return await TransactionsTrack.findByIdAndUpdate(
           getTotals[0]._id.toString(),
           {
@@ -84,6 +71,8 @@ transRouter.post("/", async (req, res) => {
             totInvestment: _.sum([newTrans.amount, getTotals[0].totInvestment]),
           }
         );
+      } else {
+        console.log("There is no suffecient balance in your account");
       }
     }
     return res.json(getTotals[0]);
