@@ -26,7 +26,7 @@ app.use("/gettrans", require("./routes/transRouter"));
 app.use("/getbalance", require("./routes/transRouter"));
 app.use("/", require("./routes/userRouter"));
 // app.use("/", require("./routes/userRouter"));
-
+app.use("/delete", require("./routes/transRouter"));
 app.listen(5000, () => {
   console.log("Server Running on Port 5000");
 });

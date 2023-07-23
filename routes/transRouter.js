@@ -1,5 +1,4 @@
 const express = require("express");
-// const { Router } = require("express");
 const Transactions = require("../models/Transactions");
 const cors = require("cors");
 const _ = require("lodash");
@@ -32,6 +31,13 @@ transRouter.post("/", async (req, res) => {
 
     await newTrans.save();
 
+    // const addTotals = new TransactionsTrack({
+    //   totAmount: 5000,
+    //   totSavings: 0,
+    //   totExpense: 0,
+    //   totInvestment: 0,
+    // });
+    // await addTotals.save();
     const getTotals = await TransactionsTrack.find();
     const totalAmount = _.sum([
       // getTotals[0].totSavings,
@@ -39,7 +45,7 @@ transRouter.post("/", async (req, res) => {
       getTotals[0].totInvestment,
       newTrans.amount,
     ]);
-    // console.log(totalAmount);
+    console.log(totalAmount);
     if (newTrans.type === "savings") {
       return await TransactionsTrack.findByIdAndUpdate(
         getTotals[0]._id.toString(),
@@ -87,5 +93,16 @@ transRouter.get("/", async (req, res) => {
     console.log(err);
   }
 });
-
+transRouter.delete("/deletetrans/:id", async (req, res) => {
+  const id = req.params.id.toString();
+  console.log(id);
+  try {
+    let isDelete = await Transactions.findOneAndDelete({ id });
+    if (isDelete) {
+      return res.send(await Transactions.find());
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
 module.exports = transRouter;
