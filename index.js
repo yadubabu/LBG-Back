@@ -14,7 +14,10 @@ app.use(
   })
 );
 mongoose
-  .connect("mongodb+srv://mohini:mohinimohini@cluster0.sqdke.mongodb.net/test")
+  .connect(
+    "mongodb+srv://mohini:mohinimohini@cluster0.sqdke.mongodb.net/test",
+    { useNewUrlParser: true, useUnifiedTopology: true }
+  )
   .then(() => console.log("DB Connected"));
 
 app.get("/", async (req, res) => {

@@ -31,13 +31,6 @@ transRouter.post("/", async (req, res) => {
 
     await newTrans.save();
 
-    // const addTotals = new TransactionsTrack({
-    //   totAmount: 5000,
-    //   totSavings: 0,
-    //   totExpense: 0,
-    //   totInvestment: 0,
-    // });
-    // await addTotals.save();
     const getTotals = await TransactionsTrack.find();
     const totalAmount = _.sum([
       // getTotals[0].totSavings,
@@ -95,12 +88,30 @@ transRouter.get("/", async (req, res) => {
 });
 transRouter.delete("/deletetrans/:id", async (req, res) => {
   const id = req.params.id.toString();
-  console.log(id);
+  const editTransactions = await TransactionsTrack.find();
+
   try {
-    let isDelete = await Transactions.findOneAndDelete({ id });
-    if (isDelete) {
-      return res.send(await Transactions.find());
-    }
+    return Transactions.findByIdAndDelete(id).then((doc) => {
+      // if (doc.type === "expense") {
+      //   return res.json(editTransactions[0]);
+      // }
+      if (doc.type === "expense") {
+        return TransactionsTrack.updateOne({
+          totAmount: _.sum([editTransactions[0].totAmount, doc.amount]),
+          totExpense: editTransactions[0].totExpense - doc.amount,
+        });
+      } else if (doc.type === "savings") {
+        return TransactionsTrack.updateOne({
+          totAmount: editTransactions[0].totAmount - doc.amount,
+          totSavings: editTransactions[0].totSavings - doc.amount,
+        });
+      } else if (doc.type === "investment") {
+        return TransactionsTrack.updateOne({
+          totAmount: _.sum([editTransactions[0].totAmount, doc.amount]),
+          totInvestment: editTransactions[0].totInvestment - doc.amount,
+        });
+      }
+    });
   } catch (err) {
     console.log(err);
   }

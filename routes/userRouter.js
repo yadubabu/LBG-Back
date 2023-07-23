@@ -17,6 +17,13 @@ userRouter.post("/adduser", async (req, res) => {
       pancard,
       phone,
     });
+    const addAccount = new TransactionsTrack({
+      totAmount: 5000,
+      totSavings: 0,
+      totExpense: 0,
+      totInvestment: 0,
+    });
+    await addAccount.save();
     await newUser.save();
     return res.status(200).json("User Registered Successfully");
   } catch (err) {
